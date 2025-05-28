@@ -37,7 +37,7 @@ resource "azurerm_subnet" "subnet" {
   name = "${azurerm_resource_group.rg.name}-subnet"
   address_prefixes = [ "10.0.1.0/24" ]
   resource_group_name = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.hylastix-vnet.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
 }
 
 # Create a network security group
@@ -71,6 +71,14 @@ resource "azurerm_network_security_group" "nsg" {
   } ]
 }
 
+# Create a public IP address
+resource "azurerm_public_ip" "pub_ip" {
+  name = "${azurerm_resource_group.rg.name}-pub-ip"
+  location = var.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method = "Static"
+}
+
 # Create a network interface
 resource "azurerm_network_interface" "nic" {
   name = "${azurerm_resource_group.rg.name}-nic"
@@ -81,6 +89,7 @@ resource "azurerm_network_interface" "nic" {
     name = "internal"
     subnet_id = azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
+    public_ip_address_id = azurerm_public_ip.pub_ip.id
   }
 }
 
