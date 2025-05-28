@@ -39,3 +39,53 @@ resource "azurerm_subnet" "subnet" {
   resource_group_name = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.hylastix-vnet.name
 }
+
+# Create a network security group
+resource "azurerm_network_security_group" "nsg" {
+  name = "${azurerm_resource_group.rg.name}-nsg"
+  location = var.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  security_rule = [ {
+    name = "Allow-SSH"
+    description = "Allow SSH"
+    priority = 1001
+    direction = "Inbound"
+    access = "Allow"
+    protocol = "Tcp"
+
+    source_port_range = "*"
+    destination_port_range = "22"
+
+    source_port_ranges = []
+    destination_port_ranges = []
+
+    source_address_prefix = "*"
+    destination_address_prefix = "*"
+
+    source_address_prefixes = []
+    destination_address_prefixes = []
+
+    source_application_security_group_ids = []
+    destination_application_security_group_ids = []
+  } ]
+}
+
+# Create a network interface
+resource "azurerm_network_interface" "nic" {
+  name = "${azurerm_resource_group.rg.name}-nic"
+  location = var.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  ip_configuration {
+    name = "internal"
+    subnet_id = azurerm_subnet.subnet.id
+    private_ip_address_allocation = "Dynamic"
+  }
+}
+
+# Create a security group association
+resource "azurerm_network_interface_security_group_association" "sng-association" {
+  network_interface_id = azurerm_network_interface.nic.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
