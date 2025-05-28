@@ -25,3 +25,12 @@ variable "location" {
   default = "West Europe"
 }
 
+variable "vm_admin_username" {
+  type = string
+  description = "Admin username"
+}
+
+variable "vm_admin_public_key_path" {
+  type = string
+  description = "Admin public key path"
+}

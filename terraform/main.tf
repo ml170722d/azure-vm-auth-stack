@@ -98,3 +98,32 @@ resource "azurerm_network_interface_security_group_association" "sng-association
   network_interface_id = azurerm_network_interface.nic.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
+
+# Create a linux virtial machine
+resource "azurerm_linux_virtual_machine" "vm" {
+  name = "${azurerm_resource_group.rg.name}-vm"
+  location = var.location
+  resource_group_name = azurerm_resource_group.rg.name
+  size = "Standard_B2ls_v2"
+  admin_username = var.vm_admin_username
+  network_interface_ids = [
+    azurerm_network_interface.nic.id
+  ]
+
+  admin_ssh_key {
+    public_key = file(var.vm_admin_public_key_path)
+    username = var.vm_admin_username
+  }
+
+  os_disk {
+    caching = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer = "ubuntu-24_04-lts"
+    sku = "server"
+    version = "latest"
+  }
+}
