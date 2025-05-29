@@ -6,6 +6,7 @@ resource "azurerm_resource_group" "rg" {
 
 # Create resource group delete lock
 resource "azurerm_management_lock" "delete_lock" {
+  count = var.enable_delete_lock ? 1 : 0
   name = "${var.name}-rg-delete-lock"
   scope = azurerm_resource_group.rg.id
   lock_level = "CanNotDelete"

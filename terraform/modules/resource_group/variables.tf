@@ -7,3 +7,8 @@ variable "location" {
   type = string
   description = "Azure region"
 }
+
+variable "enable_delete_lock" {
+  type = bool
+  default = false
+}
