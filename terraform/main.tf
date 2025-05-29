@@ -18,120 +18,54 @@ provider "azurerm" {
   subscription_id   = var.subscription_id
 }
 
-# Create a resource group
-resource "azurerm_resource_group" "rg" {
-  name     = "hylastix"
+module "rg" {
+  source = "./modules/resource_group"
+  name = "hylastix"
   location = var.location
 }
 
-# Create resource group delete lock
-resource "azurerm_management_lock" "delete_lock" {
-  name = "${azurerm_resource_group.rg.name}-rg-delete-lock"
-  scope = azurerm_resource_group.rg.id
-  lock_level = "CanNotDelete"
-  notes = "Prevent accidental deletion of RG and children"
-}
-
-# Create a virtual network
-resource "azurerm_virtual_network" "vnet" {
-  name                = "${azurerm_resource_group.rg.name}-vnet"
-  location            = var.location
-  resource_group_name = azurerm_resource_group.rg.name
-  address_space       = ["10.0.0.0/16"]
-}
-
-# Create a virtual network subnet
-resource "azurerm_subnet" "subnet" {
-  name = "${azurerm_resource_group.rg.name}-subnet"
-  address_prefixes = [ "10.0.1.0/24" ]
-  resource_group_name = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-}
-
-# Create a network security group
-resource "azurerm_network_security_group" "nsg" {
-  name = "${azurerm_resource_group.rg.name}-nsg"
+module "vnet" {
+  source = "./modules/network"
+  rg_name = module.rg.rg_name
   location = var.location
-  resource_group_name = azurerm_resource_group.rg.name
-
-  security_rule = [ {
-    name = "Allow-SSH"
-    description = "Allow SSH"
-    priority = 1001
-    direction = "Inbound"
-    access = "Allow"
-    protocol = "Tcp"
-
-    source_port_range = "*"
-    destination_port_range = "22"
-
-    source_port_ranges = []
-    destination_port_ranges = []
-
-    source_address_prefix = "*"
-    destination_address_prefix = "*"
-
-    source_address_prefixes = []
-    destination_address_prefixes = []
-
-    source_application_security_group_ids = []
-    destination_application_security_group_ids = []
-  } ]
-}
-
-# Create a public IP address
-resource "azurerm_public_ip" "pub_ip" {
-  name = "${azurerm_resource_group.rg.name}-pub-ip"
-  location = var.location
-  resource_group_name = azurerm_resource_group.rg.name
-  allocation_method = "Static"
-}
-
-# Create a network interface
-resource "azurerm_network_interface" "nic" {
-  name = "${azurerm_resource_group.rg.name}-nic"
-  location = var.location
-  resource_group_name = azurerm_resource_group.rg.name
-
-  ip_configuration {
-    name = "internal"
-    subnet_id = azurerm_subnet.subnet.id
-    private_ip_address_allocation = "Dynamic"
-    public_ip_address_id = azurerm_public_ip.pub_ip.id
+  vnet_name = "hylastix-vnet"
+  vnet_address_space = [ "10.0.0.0/16" ]
+  subnet_configs = {
+    "kc-subnet" = [ "10.0.1.0/24" ]
   }
 }
 
-# Create a security group association
-resource "azurerm_network_interface_security_group_association" "sng-association" {
-  network_interface_id = azurerm_network_interface.nic.id
-  network_security_group_id = azurerm_network_security_group.nsg.id
+module "nic" {
+  source = "./modules/network_interface"
+  name_prefix = "hylastix"
+  location = var.location
+  rg_name = module.rg.rg_name
+  subnet_id = module.vnet.subnet_ids["kc-subnet"]
+  security_rules = {
+    "AllwoSSH" = {
+      access = "Allow"
+      priority = 1001
+      direction = "Inbound"
+      protocol = "Tcp"
+      source_port_range = "*"
+      destination_port_range = "22"
+      source_address_prefix = "*"
+      destination_address_prefix = "*"
+    }
+  }
 }
 
-# Create a linux virtial machine
-resource "azurerm_linux_virtual_machine" "vm" {
-  name = "${azurerm_resource_group.rg.name}-vm"
+module "vm" {
+  source = "./modules/compute"
+  name = "hylastix-vm"
   location = var.location
-  resource_group_name = azurerm_resource_group.rg.name
+  rg_name = module.rg.rg_name
   size = "Standard_B2ls_v2"
+
   admin_username = var.vm_admin_username
-  network_interface_ids = [
-    azurerm_network_interface.nic.id
+  admin_public_key = file(var.vm_admin_public_key_path)
+
+  nic_ids = [
+    module.nic.nic_id
   ]
-
-  admin_ssh_key {
-    public_key = file(var.vm_admin_public_key_path)
-    username = var.vm_admin_username
-  }
-
-  os_disk {
-    caching = "ReadWrite"
-    storage_account_type = "Standard_LRS"
-  }
-
-  source_image_reference {
-    publisher = "Canonical"
-    offer = "ubuntu-24_04-lts"
-    sku = "server"
-    version = "latest"
-  }
 }
