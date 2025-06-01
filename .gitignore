@@ -5,4 +5,4 @@
 terraform.tfstate
 terraform.tfstate.backup
 
-credentials.auto.tfvars
+secret.auto.tfvars
