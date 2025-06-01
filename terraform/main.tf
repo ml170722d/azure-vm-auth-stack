@@ -52,6 +52,26 @@ module "nic" {
       source_address_prefix = "*"
       destination_address_prefix = "*"
     }
+    "AllwoHTTP" = {
+      access = "Allow"
+      priority = 1002
+      direction = "Inbound"
+      protocol = "Tcp"
+      source_port_range = "*"
+      destination_port_range = "80"
+      source_address_prefix = "*"
+      destination_address_prefix = "*"
+    }
+    "AllwoHTTPS" = {
+      access = "Allow"
+      priority = 1003
+      direction = "Inbound"
+      protocol = "Tcp"
+      source_port_range = "*"
+      destination_port_range = "443"
+      source_address_prefix = "*"
+      destination_address_prefix = "*"
+    }
   }
 }
 
