@@ -6,3 +6,5 @@ terraform.tfstate
 terraform.tfstate.backup
 
 secret.auto.tfvars
+
+hosts.yaml
