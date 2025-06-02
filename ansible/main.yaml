@@ -1,0 +1,8 @@
+---
+
+- name: Configure VM
+  hosts: all
+  become: true
+  roles:
+    - install
+    # - deploy
