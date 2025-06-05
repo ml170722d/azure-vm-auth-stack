@@ -8,6 +8,13 @@ terraform {
   }
 
   required_version = ">= 1.1.0"
+
+  backend "azurerm" {
+    resource_group_name = "tfstate-rg"
+    storage_account_name = "mltfstatesa"
+    container_name = "tfstate-hylastix"
+    key = "hylastix.terraform.tfstate"
+  }
 }
 
 provider "azurerm" {
@@ -85,7 +92,7 @@ module "vm" {
   size = "Standard_B2ls_v2"
 
   admin_username = var.vm_admin_username
-  admin_public_key = file(var.vm_admin_public_key_path)
+  admin_public_key = var.vm_admin_public_key
 
   nic_ids = [
     module.nic.nic_id

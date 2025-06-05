@@ -30,7 +30,7 @@ variable "vm_admin_username" {
   description = "Admin username"
 }
 
-variable "vm_admin_public_key_path" {
+variable "vm_admin_public_key" {
   type = string
-  description = "Admin public key path"
+  description = "Admin public key"
 }
