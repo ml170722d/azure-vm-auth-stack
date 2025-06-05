@@ -1,6 +1,7 @@
 name: "Terraform & Ansible CI/CD"
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - feature/cicd_setup
