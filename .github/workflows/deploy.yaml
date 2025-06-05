@@ -1,10 +1,10 @@
 name: "Terraform & Ansible CI/CD"
 
-# # Trigger on push to main (adjust as needed)
-# on:
-#   push:
-#     branches:
-#       - main
+on:
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - main
 
 jobs:
   terraform:
