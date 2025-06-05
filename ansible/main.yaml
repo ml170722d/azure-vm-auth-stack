@@ -1,0 +1,12 @@
+---
+
+- name: Configure VM
+  hosts: all
+  become: true
+  vars:
+    app_dir: /opt/app
+  vars_files:
+    - secret.var.yaml
+  roles:
+    - install
+    - deploy

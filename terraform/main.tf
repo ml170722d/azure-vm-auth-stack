@@ -18,6 +18,8 @@ provider "azurerm" {
   subscription_id   = var.subscription_id
 }
 
+provider "local" {}
+
 module "rg" {
   source = "./modules/resource_group"
   name = "hylastix"
@@ -88,4 +90,19 @@ module "vm" {
   nic_ids = [
     module.nic.nic_id
   ]
+}
+
+resource "local_file" "generate_ansible_hosts" {
+  content = yamlencode({
+    all = {
+      hosts = {
+        vm = {
+          ansible_host = module.vm.pub_ip
+          ansible_user = var.vm_admin_username
+        }
+      }
+    }
+  })
+  filename = "${path.module}/../ansible/hosts.yaml"
+  file_permission = "640"
 }

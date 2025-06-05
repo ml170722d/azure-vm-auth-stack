@@ -1,0 +1,62 @@
+- name: “Fetch public IP via ipify.org”
+  uri:
+    url: "https://api.ipify.org"
+    return_content: yes
+  register: vm_ip
+
+- name: Ensure list of directories is defined
+  assert:
+    that:
+      - app_dir is defined
+    fail_msg: "You must provide a variable named 'app_dir'."
+
+- name: Create dirs for docker volumes
+  vars:
+    dir_names:
+      - psql
+      - kc/import
+      - nginx/html
+      - nginx/conf
+  file:
+    path: "{{ app_dir }}/{{ item }}"
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+  loop: "{{ dir_names }}"
+  loop_control:
+    label: "{{ item }}"
+
+- name: "Copy nginx configuration file"
+  template:
+    src: templates/default.conf.j2
+    dest: "{{ app_dir }}/nginx/conf/default.conf"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: "Copy keycloak realm configuration file"
+  vars:
+    host: "{{ vm_ip.content }}"
+  template:
+    src: templates/realm-export.json.j2
+    dest: "{{ app_dir }}/kc/import/realm-export.json"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: "Copy docker-compose file"
+  vars:
+    volume_dir: "{{ app_dir }}"
+    host: "{{ vm_ip.content  }}"
+  template:
+    src: templates/docker-compose.yaml.j2
+    dest: "{{ ansible_env.HOME }}/docker-compose.yaml"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: "Launch containers with docker-compose from the user’s home directory"
+  shell: docker compose up -d
+  args:
+    chdir: "{{ ansible_env.HOME }}"
