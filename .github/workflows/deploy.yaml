@@ -3,7 +3,7 @@ name: "Terraform & Ansible CI/CD"
 on:
   push:
     branches:
-      - feature/cicd_setup
+      - main
 
 jobs:
   terraform:
