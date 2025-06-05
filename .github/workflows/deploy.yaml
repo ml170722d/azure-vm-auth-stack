@@ -16,7 +16,8 @@ jobs:
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
 
       TF_VAR_vm_admin_username:         ${{ secrets.VM_ADMIN_USERNAME }}
-      TF_VAR_vm_admin_public_key_path:  ${{ secrets.VM_ADMIN_PUBLIC_KEY }}
+      TF_VAR_vm_admin_public_key:       ${{ secrets.VM_ADMIN_PUBLIC_KEY }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -48,19 +49,10 @@ jobs:
         id: tfoutputs
         working-directory: ./terraform
         run: |
-          echo "::set-output name=public_ip::$(terraform output -raw public_ip_address)"
-          echo "::set-output name=ansible_host::$(terraform output -raw ansible_host)"
-        outputs:
-          public_ip: ${{ steps.tfoutputs.outputs.public_ip }}
-          ansible_host: ${{ steps.tfoutputs.outputs.ansible_host }}
-
-      - name: Extract Terraform outputs
-        id: tfoutputs
-        working-directory: ./terraform
-        run: |
           echo "::set-output name=vm_public_ip::$(terraform output -raw vm_pub_ip)"
-        outputs:
-          vm_public_ip: ${{ steps.tfoutputs.outputs.vm_pub_ip }}
+
+    outputs:
+      vm_public_ip: ${{ steps.tfoutputs.outputs.vm_pub_ip }}
 
   ansible:
     name: "Ansible Provisioning"
@@ -73,8 +65,8 @@ jobs:
       KC_USER:          ${{ secrets.KC_USER }}
       KC_PWD:           ${{ secrets.KC_PWD }}
       KC_CLIENT_SECRET: ${{ secrets.KC_CLIENT_SECRET }}
-
       SSH_PRIVATE_KEY:  ${{ secrets.SSH_PRIVATE_KEY }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
