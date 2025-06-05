@@ -59,9 +59,8 @@ jobs:
         working-directory: ./terraform
         run: |
           echo "::set-output name=vm_public_ip::$(terraform output -raw vm_pub_ip)"
-
-    outputs:
-      vm_public_ip: ${{ steps.tfoutputs.outputs.vm_pub_ip }}
+        outputs:
+          vm_public_ip: ${{ steps.tfoutputs.outputs.vm_pub_ip }}
 
   ansible:
     name: "Ansible Provisioning"
