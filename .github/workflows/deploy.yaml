@@ -38,6 +38,7 @@ jobs:
       - name: Terraform Format & Validate
         run: |
           pwd
+          ls -la
           terraform fmt -check
           terraform validate
 
