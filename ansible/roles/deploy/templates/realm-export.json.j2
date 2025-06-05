@@ -692,19 +692,19 @@
       "clientId": "nginx-auth",
       "name": "",
       "description": "",
-      "rootUrl": "http://{{ ???_vm_ip }}",
+      "rootUrl": "http://{{ host }}",
       "adminUrl": "",
-      "baseUrl": "http://{{ ???_vm_ip }}",
+      "baseUrl": "http://{{ host }}",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "{{ ???_kc_client_secret }}",
+      "secret": "{{ kc_client_secret }}",
       "redirectUris": [
         "/oauth2/callback/*"
       ],
       "webOrigins": [
-        "http://{{ ???_vm_ip }}"
+        "http://{{ host }}"
       ],
       "notBefore": 0,
       "bearerOnly": false,

@@ -4,9 +4,9 @@ services:
     container_name: postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: {{ ???_psql_user }}
-      POSTGRES_PASSWORD: {{ ???_psql_pwd }}
-      POSTGRES_DB: {{ ???_psql_db }}
+      POSTGRES_USER: {{ psql_user }}
+      POSTGRES_PASSWORD: {{ psql_pwd }}
+      POSTGRES_DB: {{ db }}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -17,12 +17,12 @@ services:
     container_name: keycloak
     restart: unless-stopped
     environment:
-      KC_DB: {{ ???_psql_db }}
-      KC_DB_URL: jdbc:postgresql://postgres:5432/{{ ???_psql_db }}
-      KC_DB_USERNAME: {{ ???_psql_user }}
-      KC_DB_PASSWORD: {{ ???_psql_pwd }}
-      KC_BOOTSTRAP_ADMIN_USERNAME: {{ ???_kc_user }}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: {{ ???_kc_pwd }}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/{{ db }}
+      KC_DB_USERNAME: {{ psql_user }}
+      KC_DB_PASSWORD: {{ psql_pwd }}
+      KC_BOOTSTRAP_ADMIN_USERNAME: {{ kc_user }}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: {{ kc_pwd }}
       KC_HTTP_RELATIVE_PATH: /auth
       KC_HEALTH_ENABLED: "true"
     command:
@@ -44,19 +44,19 @@ services:
     environment:
       OAUTH2_PROXY_PROVIDER: keycloak
       OAUTH2_PROXY_CLIENT_ID: nginx-auth
-      OAUTH2_PROXY_CLIENT_SECRET: {{ ???_kc_client_secret }}
+      OAUTH2_PROXY_CLIENT_SECRET: {{ kc_client_secret }}
       OAUTH2_PROXY_SCOPE: "openid email"
 
       # The URL users will use to reach oauth2-proxy (running on port 4180)
-      OAUTH2_PROXY_REDIRECT_URL: http://{{ ???_vm_ip }}/oauth2/callback
+      OAUTH2_PROXY_REDIRECT_URL: http://{{ host }}/oauth2/callback
       OAUTH2_PROXY_HTTP_ADDRESS: "0.0.0.0:4180"
 
       # Keycloak’s authorize & token endpoints (realm "master" shown as example)
       # Adjust the realm name or host if you spun Keycloak up on a different host.
       # OAUTH2_PROXY_KEYCLOAK_GROUPS_CLAIM: groups
-      OAUTH2_PROXY_LOGIN_URL: http://{{ ???_vm_ip }}/auth/realms/hylastix/protocol/openid-connect/auth
-      OAUTH2_PROXY_REDEEM_URL: http://{{ ???_vm_ip }}/auth/realms/hylastix/protocol/openid-connect/token
-      OAUTH2_PROXY_VALIDATE_URL: http://{{ ???_vm_ip }}/auth/realms/hylastix/protocol/openid-connect/userinfo
+      OAUTH2_PROXY_LOGIN_URL: http://{{ host }}/auth/realms/hylastix/protocol/openid-connect/auth
+      OAUTH2_PROXY_REDEEM_URL: http://{{ host }}/auth/realms/hylastix/protocol/openid-connect/token
+      OAUTH2_PROXY_VALIDATE_URL: http://{{ host }}/auth/realms/hylastix/protocol/openid-connect/userinfo
 
       OAUTH2_PROXY_COOKIE_SECURE: "false"
       OAUTH2_PROXY_COOKIE_SECRET: "5ymPXe4KlfnDOmi92DsKFRRTHJgqcfx6lqK2OvlHmwk="
@@ -90,22 +90,22 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: {{ ???_v_path }}/postgres
+      device: {{ volume_dir }}/psql
   keycloak_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: {{ ???_v_path }}/keycloak
+      device: {{ volume_dir }}/kc
   nginx_html:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: {{ ???_v_path }}/nginx/html
+      device: {{ volume_dir }}/nginx/html
   nginx_conf:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: {{ ???_v_path }}/nginx/conf
+      device: {{ volume_dir }}/nginx/conf
