@@ -47,10 +47,10 @@ jobs:
       - name: Extract Terraform outputs
         id: tfoutputs
         run: |
-          echo "::set-output name=vm_public_ip::$(terraform output -raw vm_pub_ip)"
+          echo "public_ip=$(terraform output -raw vm_pub_ip)"
 
     outputs:
-      vm_public_ip: ${{ steps.tfoutputs.outputs.vm_pub_ip }}
+      vm_public_ip: ${{ steps.tfoutputs.outputs.public_ip }}
 
   ansible:
     name: "Ansible Provisioning"
