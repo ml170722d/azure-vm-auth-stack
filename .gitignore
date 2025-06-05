@@ -1,4 +1,4 @@
-.venv
+# terraform gitignore
 .terraform
 .terraform.lock.hcl
 
@@ -7,4 +7,7 @@ terraform.tfstate.backup
 
 secret.auto.tfvars
 
+# ansible gitignore
+.venv
 hosts.yaml
+secret.var.yaml
