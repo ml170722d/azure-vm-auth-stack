@@ -85,7 +85,7 @@ module "vm" {
   size = "Standard_B2ls_v2"
 
   admin_username = var.vm_admin_username
-  admin_public_key = file(var.vm_admin_public_key_path)
+  admin_public_key = var.vm_admin_public_key
 
   nic_ids = [
     module.nic.nic_id
