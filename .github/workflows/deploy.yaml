@@ -35,6 +35,7 @@ jobs:
       - name: Terraform Format & Validate
         working-directory: ./terraform
         run: |
+          pwd
           terraform fmt -check
           terraform validate
 
