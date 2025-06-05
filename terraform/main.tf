@@ -8,6 +8,13 @@ terraform {
   }
 
   required_version = ">= 1.1.0"
+
+  backend "azurerm" {
+    resource_group_name = "tfstate-rg"
+    storage_account_name = "mltfstatesa"
+    container_name = "tfstate-hylastix"
+    key = "hylastix.terraform.tfstate"
+  }
 }
 
 provider "azurerm" {
