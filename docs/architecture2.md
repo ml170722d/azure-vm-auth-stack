@@ -46,7 +46,7 @@ All Azure resources are provisioned via Terraform. We create:
 
 When complete, we have one VM in a secured VNet, reachable over SSH (port 22) and HTTP (port 80).
 
-![Infrastructure Diagram](docs/assets/infrastructure_resource_setup.png)
+![Infrastructure Diagram](./assets/infrastructure_resource_setup.png)
 
 > **Figure:**
 > Resource Group → VNet → Subnet → NIC + NSG → VM + Public IP
