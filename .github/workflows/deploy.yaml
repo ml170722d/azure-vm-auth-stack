@@ -40,7 +40,6 @@ jobs:
 
       - name: Terraform Format & Validate
         run: |
-          # terraform fmt -check
           terraform validate
 
       - name: Terraform Plan
