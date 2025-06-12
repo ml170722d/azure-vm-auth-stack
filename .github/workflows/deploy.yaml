@@ -61,7 +61,8 @@ jobs:
         id: tfoutputs
         run: |
           IP=$(terraform output -raw vm_pub_ip)
-          echo "::set-output name=public_ip::$IP"
+          echo "public_ip=$IP" >> $GITHUB_OUTPUT
+          echo $GITHUB_OUTPUT
 
   ansible:
     name: "Ansible Provisioning"
