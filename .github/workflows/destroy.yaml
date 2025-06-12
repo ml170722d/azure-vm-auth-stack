@@ -7,6 +7,10 @@ jobs:
   destroy:
     name: "Terraform Destroy"
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./terraform
     env:
       ARM_CLIENT_ID:       ${{ secrets.ARM_CLIENT_ID }}
       ARM_CLIENT_SECRET:   ${{ secrets.ARM_CLIENT_SECRET }}
@@ -17,15 +21,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: "Azure Login"
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: "1.5.6"
 
       - name: Terraform Init
-        working-directory: ./terraform
         run: terraform init -input=false
 
       - name: Terraform Destroy
-        working-directory: ./terraform
         run: terraform destroy -auto-approve -input=false
