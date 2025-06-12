@@ -61,6 +61,7 @@ jobs:
         id: tfoutputs
         run: |
           IP=$(terraform output -raw vm_pub_ip)
+          echo $IP
           echo "public_ip=$IP" >> $GITHUB_OUTPUT
           echo $GITHUB_OUTPUT
 
