@@ -26,6 +26,8 @@ jobs:
       TF_VAR_subscription_id:       ${{ secrets.ARM_SUBSCRIPTION_ID }}
       TF_VAR_vm_admin_username:     ${{ secrets.VM_ADMIN_USERNAME }}
       TF_VAR_vm_admin_public_key:   ${{ secrets.VM_ADMIN_PUBLIC_KEY }}
+    # outputs:
+    #   vm_public_ip: ${{ steps.tfoutputs.outputs.public_ip }}
 
     steps:
       - name: Checkout repository
@@ -54,13 +56,13 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
 
-      - name: Extract Terraform outputs
-        id: tfoutputs
-        run: |
-          echo "public_ip=$(terraform output -raw vm_pub_ip)"
-
-    outputs:
-      vm_public_ip: ${{ steps.tfoutputs.outputs.public_ip }}
+      # - name: Extract Terraform outputs
+      #   id: tfoutputs
+      #   run: |
+      #     IP=$(terraform output -raw vm_pub_ip)
+      #     echo $IP
+      #     echo "public_ip=$IP" >> $GITHUB_OUTPUT
+      #     echo $GITHUB_OUTPUT
 
   ansible:
     name: "Ansible Provisioning"
@@ -69,7 +71,6 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ./ansible
     env:
       DB:               ${{ secrets.DB }}
       PSQL_USER:        ${{ secrets.PSQL_USER }}
@@ -85,6 +86,7 @@ jobs:
 
       - name: Install Ansible
         run: |
+          # echo '${{ toJson(needs.terraform.outputs) }}'
           sudo apt-get update
           sudo apt-get install -y python3-pip
           pip3 install -r requirements.txt
@@ -95,13 +97,11 @@ jobs:
           echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Add VM to known_hosts (avoid interactive prompt)
-        run: |
-          ssh-keyscan -H ${{ needs.terraform.outputs.vm_public_ip }} >> ~/.ssh/known_hosts
-
       - name: Run Ansible Playbook
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
         run: |
           ansible-playbook \
-            -i hosts.yaml \
-            main.yaml \
+            -i ./ansible/hosts.yaml \
+            ./ansible/main.yaml \
             --private-key ~/.ssh/id_rsa
