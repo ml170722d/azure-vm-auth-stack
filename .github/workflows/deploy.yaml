@@ -60,8 +60,8 @@ jobs:
       - name: Extract Terraform outputs
         id: tfoutputs
         run: |
-          ip=$(terraform output -raw vm_pub_ip)
-          echo "public_ip=$ip" >> $GITHUB_OUTPUT
+          IP=$(terraform output -raw vm_pub_ip)
+          echo "::set-output name=public_ip::$IP"
 
   ansible:
     name: "Ansible Provisioning"
