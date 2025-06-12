@@ -87,7 +87,7 @@ jobs:
 
       - name: Install Ansible
         run: |
-          echo '${{ toJson(needs.terraform.outputs) }}'
+          # echo '${{ toJson(needs.terraform.outputs) }}'
           sudo apt-get update
           sudo apt-get install -y python3-pip
           pip3 install -r requirements.txt
@@ -97,10 +97,6 @@ jobs:
           mkdir -p ~/.ssh
           echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-
-      # - name: Add VM to known_hosts
-      #   run: |
-      #     ssh-keyscan -H ${{ needs.terraform.outputs.vm_public_ip }} >> ~/.ssh/known_hosts
 
       - name: Run Ansible Playbook
         env:
