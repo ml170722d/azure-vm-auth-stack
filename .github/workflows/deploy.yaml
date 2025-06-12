@@ -27,6 +27,8 @@ jobs:
       TF_VAR_subscription_id:       ${{ secrets.ARM_SUBSCRIPTION_ID }}
       TF_VAR_vm_admin_username:     ${{ secrets.VM_ADMIN_USERNAME }}
       TF_VAR_vm_admin_public_key:   ${{ secrets.VM_ADMIN_PUBLIC_KEY }}
+    outputs:
+      vm_public_ip: ${{ steps.tfoutputs.outputs.public_ip }}
 
     steps:
       - name: Checkout repository
@@ -58,10 +60,7 @@ jobs:
       - name: Extract Terraform outputs
         id: tfoutputs
         run: |
-          echo "public_ip=$(terraform output -raw vm_pub_ip)"
-
-    outputs:
-      vm_public_ip: ${{ steps.tfoutputs.outputs.public_ip }}
+          echo "public_ip=$(terraform output -raw vm_pub_ip)" >> $GITHUB_OUTPUT
 
   ansible:
     name: "Ansible Provisioning"
