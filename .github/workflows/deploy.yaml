@@ -27,8 +27,8 @@ jobs:
       TF_VAR_subscription_id:       ${{ secrets.ARM_SUBSCRIPTION_ID }}
       TF_VAR_vm_admin_username:     ${{ secrets.VM_ADMIN_USERNAME }}
       TF_VAR_vm_admin_public_key:   ${{ secrets.VM_ADMIN_PUBLIC_KEY }}
-    outputs:
-      vm_public_ip: ${{ steps.tfoutputs.outputs.public_ip }}
+    # outputs:
+    #   vm_public_ip: ${{ steps.tfoutputs.outputs.public_ip }}
 
     steps:
       - name: Checkout repository
@@ -57,13 +57,13 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
 
-      - name: Extract Terraform outputs
-        id: tfoutputs
-        run: |
-          IP=$(terraform output -raw vm_pub_ip)
-          echo $IP
-          echo "public_ip=$IP" >> $GITHUB_OUTPUT
-          echo $GITHUB_OUTPUT
+      # - name: Extract Terraform outputs
+      #   id: tfoutputs
+      #   run: |
+      #     IP=$(terraform output -raw vm_pub_ip)
+      #     echo $IP
+      #     echo "public_ip=$IP" >> $GITHUB_OUTPUT
+      #     echo $GITHUB_OUTPUT
 
   ansible:
     name: "Ansible Provisioning"
@@ -98,11 +98,13 @@ jobs:
           echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Add VM to known_hosts
-        run: |
-          ssh-keyscan -H ${{ needs.terraform.outputs.vm_public_ip }} >> ~/.ssh/known_hosts
+      # - name: Add VM to known_hosts
+      #   run: |
+      #     ssh-keyscan -H ${{ needs.terraform.outputs.vm_public_ip }} >> ~/.ssh/known_hosts
 
       - name: Run Ansible Playbook
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
         run: |
           ansible-playbook \
             -i ./ansible/hosts.yaml \
