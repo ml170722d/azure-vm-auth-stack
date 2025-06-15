@@ -117,7 +117,7 @@ resource "local_file" "generate_ansible_hosts" {
 resource "null_resource" "run_ansible" {
   depends_on = [
     module.vm,
-    fenelocal_file.generate_ansible_hosts
+    local_file.generate_ansible_hosts
    ]
 
   provisioner "local-exec" {
