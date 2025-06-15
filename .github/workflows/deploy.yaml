@@ -5,7 +5,6 @@ on:
     branches:
       - dev
       - main
-      - hotfix/fix_ansible
 
 jobs:
   terraform:
