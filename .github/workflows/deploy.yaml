@@ -36,7 +36,7 @@ jobs:
       KC_PWD:                             ${{ secrets.KC_PWD }}
       KC_CLIENT_SECRET:                   ${{ secrets.KC_CLIENT_SECRET }}
       SSH_PRIVATE_KEY:                    ${{ secrets.SSH_PRIVATE_KEY }}
-      SSH_PRIVATE_KEY_PATH:               "~/.ssh/id_rsa"
+      SSH_PRIVATE_KEY_PATH:               "./id_rsa"
 
     steps:
       - name: Checkout repository
