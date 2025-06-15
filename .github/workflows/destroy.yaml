@@ -12,17 +12,27 @@ jobs:
         shell: bash
         working-directory: ./terraform
     env:
-      ARM_CLIENT_ID:                ${{ secrets.ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET:            ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_TENANT_ID:                ${{ secrets.ARM_TENANT_ID }}
-      ARM_SUBSCRIPTION_ID:          ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_CLIENT_ID:                      ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET:                  ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_TENANT_ID:                      ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID:                ${{ secrets.ARM_SUBSCRIPTION_ID }}
 
-      TF_VAR_client_id:             ${{ secrets.ARM_CLIENT_ID }}
-      TF_VAR_client_secret:         ${{ secrets.ARM_CLIENT_SECRET }}
-      TF_VAR_tenant_id:             ${{ secrets.ARM_TENANT_ID }}
-      TF_VAR_subscription_id:       ${{ secrets.ARM_SUBSCRIPTION_ID }}
-      TF_VAR_vm_admin_username:     ${{ secrets.VM_ADMIN_USERNAME }}
-      TF_VAR_vm_admin_public_key:   ${{ secrets.VM_ADMIN_PUBLIC_KEY }}
+      TF_VAR_client_id:                   ${{ secrets.ARM_CLIENT_ID }}
+      TF_VAR_client_secret:               ${{ secrets.ARM_CLIENT_SECRET }}
+      TF_VAR_tenant_id:                   ${{ secrets.ARM_TENANT_ID }}
+      TF_VAR_subscription_id:             ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      TF_VAR_vm_admin_username:           ${{ secrets.VM_ADMIN_USERNAME }}
+      TF_VAR_vm_admin_public_key:         ${{ secrets.VM_ADMIN_PUBLIC_KEY }}
+      TF_VAR_vm_admin_private_key_path:   "./id_rsa"
+
+      DB:                                 ${{ secrets.DB }}
+      PSQL_USER:                          ${{ secrets.PSQL_USER }}
+      PSQL_PWD:                           ${{ secrets.PSQL_PWD }}
+      KC_USER:                            ${{ secrets.KC_USER }}
+      KC_PWD:                             ${{ secrets.KC_PWD }}
+      KC_CLIENT_SECRET:                   ${{ secrets.KC_CLIENT_SECRET }}
+      SSH_PRIVATE_KEY:                    ${{ secrets.SSH_PRIVATE_KEY }}
+      SSH_PRIVATE_KEY_PATH:               "./id_rsa"
 
     steps:
       - name: Checkout repository
