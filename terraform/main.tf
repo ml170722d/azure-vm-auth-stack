@@ -110,6 +110,27 @@ resource "local_file" "generate_ansible_hosts" {
       }
     }
   })
-  filename = "${path.module}/../ansible/hosts.yaml"
+  filename = abspath("${path.module}/../ansible/hosts.yaml")
   file_permission = "640"
+}
+
+resource "null_resource" "run_ansible" {
+  depends_on = [
+    module.vm,
+    fenelocal_file.generate_ansible_hosts
+   ]
+
+  provisioner "local-exec" {
+    command = <<EOF
+      echo "Running Ansible Playbook..."
+      ansible-playbook \
+        -i ${abspath("${path.module}/../ansible/hosts.yaml")} \
+        ${abspath("${path.module}/../ansible/main.yaml")}
+    EOF
+
+    environment = {
+      ANSIBLE_HOST_KEY_CHECKING = "False"
+      ANSIBLE_PRIVATE_KEY_FILE  = abspath("${var.vm_admin_private_key_path}")
+    }
+  }
 }

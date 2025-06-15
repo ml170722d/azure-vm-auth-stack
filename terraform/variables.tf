@@ -34,3 +34,8 @@ variable "vm_admin_public_key" {
   type = string
   description = "Admin public key"
 }
+
+variable "vm_admin_private_key_path" {
+  type = string
+  description = "Path to vm admin private key"
+}
