@@ -1,0 +1,111 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: {{ psql_user }}
+      POSTGRES_PASSWORD: {{ psql_pwd }}
+      POSTGRES_DB: {{ db }}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - authnet
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    restart: unless-stopped
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/{{ db }}
+      KC_DB_USERNAME: {{ psql_user }}
+      KC_DB_PASSWORD: {{ psql_pwd }}
+      KC_BOOTSTRAP_ADMIN_USERNAME: {{ kc_user }}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: {{ kc_pwd }}
+      KC_HTTP_RELATIVE_PATH: /auth
+      KC_HEALTH_ENABLED: "true"
+    command:
+      - start-dev
+      - "--http-port=8080"
+      - --import-realm
+    depends_on:
+      - postgres
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+    networks:
+      - authnet
+
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:latest
+    container_name: oauth2-proxy
+    depends_on:
+      - keycloak
+    environment:
+      OAUTH2_PROXY_PROVIDER: keycloak
+      OAUTH2_PROXY_CLIENT_ID: nginx-auth
+      OAUTH2_PROXY_CLIENT_SECRET: {{ kc_client_secret }}
+      OAUTH2_PROXY_SCOPE: "openid email"
+
+      # The URL users will use to reach oauth2-proxy (running on port 4180)
+      OAUTH2_PROXY_REDIRECT_URL: http://{{ host }}/oauth2/callback
+      OAUTH2_PROXY_HTTP_ADDRESS: "0.0.0.0:4180"
+
+      # Keycloak’s authorize & token endpoints (realm "master" shown as example)
+      # Adjust the realm name or host if you spun Keycloak up on a different host.
+      # OAUTH2_PROXY_KEYCLOAK_GROUPS_CLAIM: groups
+      OAUTH2_PROXY_LOGIN_URL: http://{{ host }}/auth/realms/hylastix/protocol/openid-connect/auth
+      OAUTH2_PROXY_REDEEM_URL: http://{{ host }}/auth/realms/hylastix/protocol/openid-connect/token
+      OAUTH2_PROXY_VALIDATE_URL: http://{{ host }}/auth/realms/hylastix/protocol/openid-connect/userinfo
+
+      OAUTH2_PROXY_COOKIE_SECURE: "false"
+      OAUTH2_PROXY_COOKIE_SECRET: "5ymPXe4KlfnDOmi92DsKFRRTHJgqcfx6lqK2OvlHmwk="
+      OAUTH2_PROXY_COOKIE_DOMAIN: "localhost"
+      OAUTH2_PROXY_COOKIE_SAMESITE: lax
+      OAUTH2_PROXY_EMAIL_DOMAINS: "*"
+    networks:
+      - authnet
+
+  nginx:
+    image: nginx:stable
+    container_name: nginx
+    restart: unless-stopped
+    depends_on:
+      - oauth2-proxy
+    volumes:
+      - nginx_conf:/etc/nginx/conf.d:ro
+      - nginx_html:/usr/share/nginx/html:ro
+    networks:
+      - authnet
+    ports:
+      - "80:80"
+
+networks:
+  authnet:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: {{ volume_dir }}/psql
+  keycloak_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: {{ volume_dir }}/kc
+  nginx_html:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: {{ volume_dir }}/nginx/html
+  nginx_conf:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: {{ volume_dir }}/nginx/conf
